@@ -3,6 +3,7 @@ const router = new Router()
 const authController = require("../controller/authController")
 
 const {check} = require("express-validator")
+const authMiddleware = require("../middleware/authMiddleware")
 
 const controller = new authController()
 
@@ -12,6 +13,10 @@ router.post('/registration',
                 check('password','password must be 4-10 characters long ').isLength({min:4, max:10}),
             ],
             controller.registration)
+
+router.post('/login', controller.login)
+
+router.get('/users', authMiddleware, controller.getUsers)
 
 
 

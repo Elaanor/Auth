@@ -2,7 +2,19 @@ const User = require("../model/User")
 const Role = require("../model/Role")
 const bcrypt = require("bcryptjs")
 const {validationResult} = require("express-validator")
+const { findOne } = require("../model/Role")
+const secret = require("../config")
+const jwt = require("jsonwebtoken")
 
+
+const generateAccessToken = (id, roles) => {
+    const payload = {
+        id,
+        roles
+    }
+
+    return jwt.sign(payload, secret, {expiresIn: "24h"})
+}
 
 class authController {
 
@@ -35,6 +47,43 @@ class authController {
 
     }
 
+    async login(req, res){
+
+
+        try {
+            const {username, password} =req.body
+            const user = await User.findOne({username})
+            
+            const validPassword = bcrypt.compareSync(password, user.password)
+            if (!validPassword) {
+                res.status(400).json({message:'password wrong'})
+            }
+            const token = generateAccessToken(user._id, user.roles)
+
+            return res.json({token})
+
+        } catch (error) {
+            
+        }
+
+    }
+
+    async getUsers(req,res){
+        try {
+            // const userRole = new Role()
+            // const adminRole = new Role({value:"ADMIN"})
+
+
+            // await userRole.save()
+            // await adminRole.save()
+            // res.json(userRole)
+            const users = await User.find()
+            res.json(users)
+            
+        } catch (error) {
+            
+        }
+    }
 
 
 
